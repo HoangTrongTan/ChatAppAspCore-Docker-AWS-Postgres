@@ -1,0 +1,46 @@
+1. Lỗi CORS Status code: (null) & Connection reset by peer 🚫
+Hiện tượng: Trình duyệt báo lỗi CORS, curl báo Connection reset by peer.
+
+Bản chất:
+
+Không phải do thiếu cấu hình CORS mà do Server chưa kịp mở cổng nhận kết nối.
+
+Đặt đoạn chạy dbContext.Database.MigrateAsync() trước app.RunAsync(), khi kết nối DB (Supabase) bị delay 60–120s, Kestrel Web Server chưa mở port 8080 nên Docker ngắt kết nối ngay.
+
+Sai thứ tự Middleware: app.UseCors() bắt buộc phải đứng sau app.UseRouting() và trước app.MapHub().
+
+2. Lỗi "Mù Tên Miền" host.docker.internal: Name does not resolve 🧭
+Hiện tượng: Kafka, RabbitMQ, Postgres báo lỗi SocketException: Name does not resolve / 1/1 brokers are down.
+
+Bản chất:
+
+host.docker.internal mặc định chỉ hoạt động sẵn trên Docker Desktop (Windows/macOS).
+
+Trên môi trường Docker Linux (máy ảo VMware), các container chạy trong mạng cô lập sẽ không tự phân giải được tên miền này trừ khi truyền cờ --add-host hoặc tạo chung một Docker Network (app-net) để chúng gọi nhau trực tiếp bằng tên container.
+Cách fix: docker network create app-net
+
+3. Lỗi Cú Pháp File .env (Superpower.ParseException: unexpected 'C') 📜
+Hiện tượng: Backend crash ngay dòng DotNetEnv.Env.Load().
+
+Bản chất:
+
+Parser của DotNetEnv đọc file .env theo dạng text thuần túy. Khi copy paste bị lặp chuỗi ConnectionStrings__DefaultConnection="ConnectionStrings__DefaultConnection="..., parser gặp ký tự C thừa và dấu ngoặc kép không hợp lệ nên quăng lỗi cú pháp.
+
+4. Lỗi Kiến Trúc: Đòi Đưa Kafka/RabbitMQ Vào Dockerfile Của App 🏗️
+Hiện tượng: Nhầm lẫn cách chạy các service phụ trợ.
+
+Bản chất:
+
+Triết lý Single Responsibility: Mỗi Dockerfile chỉ đóng gói 1 runtime/service duy nhất (Backend .NET).
+
+Các Broker/DB như Kafka, RabbitMQ, Redis, Postgres là các Node/Server độc lập. Chúng phải chạy ở các container riêng biệt hoặc quản lý tập trung qua docker-compose.yml.
+
+5. Lỗi Unknown topic or partition Ở Kafka Consumer 📦
+Hiện tượng: Kết nối Kafka thành công nhưng log báo Subscribed topic not available: chat-messages.
+
+Bản chất:
+
+Kafka Broker đã thông mạng, nhưng container Kafka mới tạo là một instance trắng tinh, chưa có sẵn các Topic (chat-messages, room-events, user-events).
+
+Khắc phục bằng cách tạo Topic thủ công qua script CLI hoặc bật cờ KAFKA_AUTO_CREATE_TOPICS_ENABLE=true để Broker tự động tạo topic khi có request đầu tiên.
+Cách fix: docker exec -it kafka /opt/kafka/bin/kafka-topics.sh --create --topic chat-messages --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1

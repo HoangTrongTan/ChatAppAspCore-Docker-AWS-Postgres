@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ChatApp.API/ChatApp.API.csproj" />
+    <Project Path="src/ChatApp.Application/ChatApp.Application.csproj" />
+    <Project Path="src/ChatApp.Domain/ChatApp.Domain.csproj" />
+    <Project Path="src/ChatApp.Infrastructure/ChatApp.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".env" />
+    <File Path=".dockerignore" />
+    <File Path="Dockerfile" />
+    <File Path="NoteErr.txt" />
+  </Folder>
+  <Properties Name="Visual Studio">
+    <Property Name="OpenWith" Value="17" />
+  </Properties>
+</Solution>

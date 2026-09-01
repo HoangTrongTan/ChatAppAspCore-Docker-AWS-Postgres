@@ -1,0 +1,21 @@
+﻿FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache krb5-libs
+
+COPY . . 
+
+# Kéo thư viện về
+RUN dotnet restore "ChatApp.Backend.slnx"
+
+# Chạy app api
+WORKDIR /app/src/ChatApp.API
+
+EXPOSE 8080
+
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV ASPNETCORE_HTTP_PORTS=8080
+
+CMD ["dotnet", "watch", "run", "--non-interactive", "--no-launch-profile"]
+# CMD ["dotnet", "run"]

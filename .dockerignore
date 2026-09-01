@@ -1,0 +1,69 @@
+## .dockerignore cho ASP.NET Core
+## Loại bỏ những thứ không cần thiết khi build Docker image
+## → Build nhanh hơn, image nhỏ hơn
+
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# IDE và Editor files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.DotSettings
+
+# Git
+.git/
+.gitignore
+
+# Docker files (không cần bên trong container)
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Logs (sẽ mount volume trong production)
+logs/
+*.log
+
+# Test projects (không cần trong production image)
+**/*Tests*/
+**/*.Tests/
+
+# NuGet packages (sẽ được restore trong Docker build)
+# Nhưng giữ lại packages trong image để layer caching
+# **/packages/  ← KHÔNG exclude vì sẽ cần restore
+
+# Node.js (nếu có frontend trong cùng repo)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment files (secret - mount vào container, không bake vào image)
+.env
+.env.*
+!.env.example
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.azure-pipelines.yml
+Jenkinsfile
+
+# Documentation
+README.md
+CHANGELOG.md
+docs/
+
+# Coverage reports
+coverage/
+TestResults/
+
+# Secrets (TUYỆT ĐỐI không đưa vào image)
+*.pfx
+*.key
+*.pem
+secrets/

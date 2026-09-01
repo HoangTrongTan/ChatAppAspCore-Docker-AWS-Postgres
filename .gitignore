@@ -1,0 +1,55 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+
+# Visual Studio & IDE temporary files
+.vs/
+.idea/
+.vscode/
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+*.userprefs
+*.rsuser
+*.sln.iml
+
+# Test & Coverage results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+BenchmarkDotNet.Artifacts/
+Coverage/
+*.ncoveroutput
+
+# NuGet & packages
+*.nupkg
+*.snupkg
+project.lock.json
+
+# Node & Package Managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files & Secrets
+.env
+.env.*
+!.env.example
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
