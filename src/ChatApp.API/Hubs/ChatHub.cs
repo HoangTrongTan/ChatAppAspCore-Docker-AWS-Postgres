@@ -82,7 +82,16 @@ public class ChatHub(
         var username = Context.Items["username"]?.ToString()
             ?? throw new HubException("Not authenticated. Please join a room first.");
 
-        var command = new SendMessageCommand(payload.Content, payload.RoomName, username);
+        var roomName = !string.IsNullOrWhiteSpace(payload.RoomName)
+            ? payload.RoomName
+            : Context.Items["roomName"]?.ToString();
+
+        if (string.IsNullOrWhiteSpace(roomName))
+        {
+            throw new HubException("Room name is required. Please join a room first.");
+        }
+
+        var command = new SendMessageCommand(payload.Content, roomName, username);
 
         // [MediatR] Handler sẽ save DB, Kafka publish, và gọi IChatNotifier
         // IChatNotifier implement là SignalRChatNotifier → gọi lại Hub

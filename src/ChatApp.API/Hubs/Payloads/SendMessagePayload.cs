@@ -8,4 +8,5 @@ namespace ChatApp.API.Hubs.Payloads;
 ///
 /// SignalR tự động deserialize object này từ JSON payload của client.
 /// </summary>
-public record SendMessagePayload(string Content, string RoomName);
+public record SendMessagePayload(string Content, string? RoomName = null);
+

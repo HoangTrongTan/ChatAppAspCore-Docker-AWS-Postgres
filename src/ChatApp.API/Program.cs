@@ -8,7 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 
-DotNetEnv.Env.TraversePath().Load();
+// 👉 Chỉ dùng khi chạy F5 trực tiếp trên Visual Studio không qua Docker:
+#if DEBUG
+DotNetEnv.Env.Load("../env/.env.dev");
+#endif
 /// <summary>
 /// [ASP.NET Core 8 - Top-level Program.cs]
 /// Minimal hosting model → không cần Startup.cs.
@@ -51,6 +54,15 @@ builder.Services.AddSignalR(options =>
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+})
+.AddJsonProtocol(options =>
+{
+    // [JSON Serialization] FE gửi camelCase (roomName, content),
+    // C# record có PascalCase properties (RoomName, Content).
+    // PropertyNameCaseInsensitive = true → deserialize không phân biệt hoa thường.
+    // CamelCaseNamingPolicy         → serialize trả về FE dạng camelCase.
+    options.PayloadSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    options.PayloadSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
 // [Adapter Pattern] SignalRChatNotifier implements IChatNotifier
@@ -81,8 +93,10 @@ builder.Services.AddSwaggerGen(c =>
 
 // [Health Checks] Monitoring endpoint → dùng với Kubernetes liveness/readiness probe
 builder.Services.AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!)
-    .AddRedis(builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379");
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? throw new InvalidOperationException("DefaultConnection is missing!"))
+    .AddRedis(builder.Configuration["Redis:ConnectionString"] 
+        ?? throw new InvalidOperationException("Redis ConnectionString is missing!"));
 
 // ─── Build App ────────────────────────────────────────────────────────────────
 var app = builder.Build();
