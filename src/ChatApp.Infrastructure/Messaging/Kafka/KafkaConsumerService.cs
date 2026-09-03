@@ -30,8 +30,19 @@ public class KafkaConsumerService(
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "localhost:9092",
 
+            SecurityProtocol = Enum.TryParse<SecurityProtocol>(configuration["Kafka:SecurityProtocol"], true, out var sec)
+                ? sec
+                : SecurityProtocol.Plaintext,
+
+            SaslMechanism = Enum.TryParse<SaslMechanism>(configuration["Kafka:SaslMechanism"], true, out var mech)
+                ? mech
+                : null,
+
+            SaslUsername = configuration["Kafka:SaslUsername"],
+            SaslPassword = configuration["Kafka:SaslPassword"],
+
             // [Consumer Group] Tất cả instances cùng GroupId chia sẻ partitions
-            GroupId = "chatapp-consumer-group",
+            GroupId = configuration["Kafka:GroupId"] ?? "chatapp-consumer-group",
 
             // [Offset Reset] Khi consumer group mới → bắt đầu từ earliest message
             AutoOffsetReset = AutoOffsetReset.Earliest,

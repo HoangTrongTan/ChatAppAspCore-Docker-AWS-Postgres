@@ -92,23 +92,31 @@ public static class DependencyInjection
                 var host = configuration["RabbitMQ:Host"] ?? "localhost";
                 var username = configuration["RabbitMQ:Username"] ?? "guest";
                 var password = configuration["RabbitMQ:Password"] ?? "guest";
+                var virtualHost = configuration["RabbitMQ:VirtualHost"] ?? "/";
 
-                cfg.Host(host, "/", h =>
+                if (host.Contains("cloudamqp.com"))
                 {
-                    h.Username(username);
-                    h.Password(password);
-                });
+                    // Chạy chuẩn TLS CloudAMQP cổng 5671
+                    cfg.Host(new Uri($"amqps://{host}:5671/{virtualHost}"), h =>
+                    {
+                        h.Username(username);
+                        h.Password(password);
+                    });
+                }
+                else
+                {
+                    cfg.Host(host, virtualHost, h =>
+                    {
+                        h.Username(username);
+                        h.Password(password);
+                    });
+                }
 
-                // [Retry Policy] Tự động retry 3 lần với exponential backoff
                 cfg.UseMessageRetry(r => r.Exponential(
                     retryLimit: 3,
                     minInterval: TimeSpan.FromSeconds(1),
                     maxInterval: TimeSpan.FromSeconds(30),
                     intervalDelta: TimeSpan.FromSeconds(5)));
-
-                // [Dead Letter Queue] MassTransit mặc định đã gửi message lỗi (sau khi hết retry)
-                // vào queue "<queue-name>_error" — không có API UseDeadLetterQueue trong
-                // MassTransit.RabbitMQ, NewMessageFaultConsumer bên dưới sẽ consume Fault<T> đó.
 
                 cfg.ConfigureEndpoints(ctx);
             });
