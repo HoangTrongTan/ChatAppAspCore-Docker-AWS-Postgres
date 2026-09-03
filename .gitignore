@@ -15,7 +15,6 @@ artifacts/
 # Visual Studio & IDE temporary files
 .vs/
 .idea/
-.vscode/
 *.suo
 *.user
 *.userossc
@@ -43,8 +42,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment files & Secrets
-.env
-.env.*
 !.env.example
 
 # OS generated files
@@ -53,3 +50,4 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+config.bat

@@ -36,6 +36,17 @@ public class KafkaProducer(
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "localhost:9092",
 
+            SecurityProtocol = Enum.TryParse<SecurityProtocol>(configuration["Kafka:SecurityProtocol"], true, out var sec)
+                ? sec
+                : SecurityProtocol.Plaintext,
+
+            SaslMechanism = Enum.TryParse<SaslMechanism>(configuration["Kafka:SaslMechanism"], true, out var mech)
+                ? mech
+                : null,
+
+            SaslUsername = configuration["Kafka:SaslUsername"],
+            SaslPassword = configuration["Kafka:SaslPassword"],
+
             // [Reliability Config]
             // Acks.All: chờ tất cả replicas confirm → đảm bảo durability
             Acks = Acks.All,

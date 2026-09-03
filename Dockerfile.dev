@@ -7,7 +7,7 @@ RUN apk add --no-cache krb5-libs
 COPY . . 
 
 # Kéo thư viện về
-RUN dotnet restore "ChatApp.Backend.slnx"
+RUN dotnet restore "ChatApp.Backend.slnx" && dotnet nuget locals all --clear
 
 # Chạy app api
 WORKDIR /app/src/ChatApp.API

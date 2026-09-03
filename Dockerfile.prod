@@ -1,0 +1,33 @@
+# Stage 1: Build source
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+WORKDIR /src
+
+# 1. Copy toàn bộ các file .csproj và solution để tận dụng Docker cache layer
+COPY ChatApp.Backend.slnx ./
+COPY src/ChatApp.API/*.csproj ./src/ChatApp.API/
+COPY src/ChatApp.Application/*.csproj ./src/ChatApp.Application/
+COPY src/ChatApp.Domain/*.csproj ./src/ChatApp.Domain/
+COPY src/ChatApp.Infrastructure/*.csproj ./src/ChatApp.Infrastructure/
+
+# 2. Restore các package NuGet
+RUN dotnet restore ChatApp.Backend.slnx
+
+# 3. Copy toàn bộ mã nguồn còn lại
+COPY src/ ./src/
+
+# 4. Publish project chính (ChatApp.API) ra thư mục /app/publish
+RUN dotnet publish src/ChatApp.API/ChatApp.API.csproj -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 2: Runtime Production (Siêu nhẹ)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
+RUN apk add --no-cache krb5-libs
+WORKDIR /app
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+COPY --from=build /app/publish .
+
+# File thực thi sinh ra từ project API sẽ mang tên ChatApp.API.dll
+ENTRYPOINT ["dotnet", "ChatApp.API.dll"]
